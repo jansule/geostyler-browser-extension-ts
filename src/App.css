@@ -1,0 +1,67 @@
+.gs-symbolizer-preview .map {
+  height: 100px !important;
+  width: 100px !important;
+}
+
+.copy-button {
+  height: 540px;
+  width: 50px;
+  padding-top: 0;
+  padding-bottom: 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+.copy-button>span {
+  transform: rotate(180deg);
+  writing-mode: vertical-lr;
+  height: 99%;
+}
+
+#copy-style {
+  position: absolute;
+  left: -9999px;
+}
+
+.gs-namefield-input {
+  width: 100px;
+}
+
+.featureselector {
+  padding-top: 10px;
+  padding-right: 10px;
+  padding-left: 60px;
+}
+
+.ant-breadcrumb {
+  padding-bottom: 10px;
+}
+/* .featureselector:nth-child(3) {
+  padding-left: calc(100px + 10px);
+  width: calc(680px - 100px - 10px);
+}
+.featureselector:nth-child(4) {
+  padding-left: calc(150px + 10px);
+  width: calc(680px - 150px - 10px);
+}
+.featureselector:nth-child(5) {
+  padding-left: calc(200px + 10px);
+  width: calc(680px - 200px - 10px);
+} */
+
+.editor-field > .label {
+  width: 110px;
+  text-align: right;
+}
+
+.gs-symbolizer-editor {
+  width: 300px;
+}
+
+.editor-field .color-preview {
+  width: 170px !important;
+}
+
+.editor-field .ant-select-selection {
+  width: 170px !important;
+}

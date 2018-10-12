@@ -1,0 +1,1 @@
+# GeoStyler Browser Extension (typescript)

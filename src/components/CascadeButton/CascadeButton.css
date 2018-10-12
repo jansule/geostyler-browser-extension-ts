@@ -1,0 +1,25 @@
+.geostyler-cascade-button {
+  height: 540px;
+  width: 50px;
+  padding-top: 0;
+  padding-bottom: 0;
+  position: fixed;
+  top: 0;
+}
+.geostyler-cascade-button:nth-child(2) {
+  left: 50px;
+}
+.geostyler-cascade-button:nth-child(3) {
+  left: 100px;
+}
+.geostyler-cascade-button:nth-child(4) {
+  left: 150px;
+}
+.geostyler-cascade-button:hover:not(:last-of-type) {
+  margin-right: 10px;
+}
+.geostyler-cascade-button>span {
+  transform: rotate(180deg);
+  writing-mode: vertical-lr;
+  height: 99%;
+}
