@@ -11,5 +11,5 @@
   "icons": {
     "48": "geostyler-logo.png"
   },
-  "permissions": []
+  "permissions": ["storage"]
 }

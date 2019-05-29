@@ -29,6 +29,11 @@ const _get = require('lodash/get');
 
 type itemType = 'style' | 'rule' | 'symbolizer';
 
+interface AppProps {
+  browser: any;
+  style?: GsStyle;
+}
+
 interface AppState {
   style: GsStyle;
   selectedItem: itemType;
@@ -38,7 +43,7 @@ interface AppState {
   sld?: string;
 }
 
-class App extends React.Component<{}, AppState> {
+class App extends React.Component<AppProps, AppState> {
 
   constructor(props: any) {
     super(props);
@@ -48,7 +53,7 @@ class App extends React.Component<{}, AppState> {
       editSymbolizer: undefined,
       selectedItem: 'style',
       sld: undefined,
-      style: this.getDefaultStyle()
+      style: props.style || this.getDefaultStyle()
     };
   }
 
@@ -65,7 +70,7 @@ class App extends React.Component<{}, AppState> {
     return {
       name: uniqueId('Rule '),
       symbolizers: [this.getDefaultSymbolizer()],
-      scaleDenominator: {min: 0, max: 0}
+      scaleDenominator: { min: 0, max: 0 }
     };
   }
 
@@ -88,22 +93,24 @@ class App extends React.Component<{}, AppState> {
     return idx;
   }
 
-  onItemChange = (item: itemType, obj?: GsRule|GsSymbolizer) => {
+  onItemChange = (item: itemType, obj?: GsRule | GsSymbolizer) => {
     switch (item) {
       case 'rule':
-        this.setState({selectedItem: item, editRule: obj as GsRule});
+        this.setState({ selectedItem: item, editRule: obj as GsRule });
         break;
       case 'symbolizer':
-        this.setState({selectedItem: item, editSymbolizer: obj as GsSymbolizer});
+        this.setState({ selectedItem: item, editSymbolizer: obj as GsSymbolizer });
         break;
       default:
-        this.setState({selectedItem: item});
+        this.setState({ selectedItem: item });
         break;
     }
   }
 
   onStyleChange = (style: GsStyle) => {
-    this.setState({style});
+    this.setState({ style }, () => {
+      this.props.browser.storage.local.set({ 'style': JSON.stringify(style) });
+    });
   }
 
   onRuleChange = (newRule: GsRule) => {
@@ -113,19 +120,25 @@ class App extends React.Component<{}, AppState> {
     if (ruleIdx > -1) {
       style.rules[ruleIdx] = newRule;
     }
-    this.setState({style, editRule: newRule});
+    this.setState({ style, editRule: newRule }, () => {
+      this.props.browser.storage.local.set({ 'style': JSON.stringify(style) });
+    });
   }
 
   onAddRule = () => {
     const style = _cloneDeep(this.state.style);
     style.rules.push(this.getDefaultRule());
-    this.setState({style});
+    this.setState({ style }, () => {
+      this.props.browser.storage.local.set({ 'style': JSON.stringify(style) });
+    });
   }
 
   onRemoveRule = (rule: GsRule) => {
     const style = _cloneDeep(this.state.style);
     style.rules = style.rules.filter((r: GsRule) => r.name !== rule.name);
-    this.setState({style});
+    this.setState({ style }, () => {
+      this.props.browser.storage.local.set({ 'style': JSON.stringify(style) });
+    });
   }
 
   onSymbolizerChange = (rule: GsRule, symbolizer: GsSymbolizer) => {
@@ -138,7 +151,9 @@ class App extends React.Component<{}, AppState> {
         style.rules[ruleIdx].symbolizers[symbIdx] = symbolizer;
       }
     }
-    this.setState({style, editRule: style.rules[ruleIdx], editSymbolizer: symbolizer});
+    this.setState({ style, editRule: style.rules[ruleIdx], editSymbolizer: symbolizer }, () => {
+      this.props.browser.storage.local.set({ 'style': JSON.stringify(style) });
+    });
   }
 
   onAddSymbolizer = (rule: GsRule) => {
@@ -147,7 +162,9 @@ class App extends React.Component<{}, AppState> {
     if (idx > -1) {
       style.rules[idx].symbolizers.push(this.getDefaultSymbolizer());
     }
-    this.setState({style, editRule: style.rules[idx]});
+    this.setState({ style, editRule: style.rules[idx] }, () => {
+      this.props.browser.storage.local.set({ 'style': JSON.stringify(style) });
+    });
   }
 
   onRemoveSymbolizer = (rule: GsRule, symbolizer: GsSymbolizer) => {
@@ -157,20 +174,22 @@ class App extends React.Component<{}, AppState> {
       style.rules[idx].symbolizers = style.rules[idx].symbolizers
         .filter((s: GsSymbolizer) => !_isEqual(s, symbolizer));
     }
-    this.setState({style, editRule: style.rules[idx]});
+    this.setState({ style, editRule: style.rules[idx] }, () => {
+      this.props.browser.storage.local.set({ 'style': JSON.stringify(style) });
+    });
   }
 
   copyToClipboard = () => {
-    this.setState({copy: true}, () => {
+    this.setState({ copy: true }, () => {
       const parser = new SldStyleParser();
       parser.writeStyle(this.state.style)
         .then((sld: string) => {
-          this.setState({sld}, () => {
+          this.setState({ sld }, () => {
             const copyText = document.getElementById('copy-style') as HTMLInputElement;
             if (copyText) {
               copyText.select();
               document.execCommand('copy');
-              this.setState({copy: false});
+              this.setState({ copy: false });
             }
           });
         });
@@ -194,12 +213,12 @@ class App extends React.Component<{}, AppState> {
         <div className="App">
           <Row type="flex">
             {/* <Col> */}
-              <Button
-                className="copy-button"
-                type="primary"
-                onClick={this.copyToClipboard}
-              >Copy to Clipboard</Button>
-              {/* <Cascader
+            <Button
+              className="copy-button"
+              type="primary"
+              onClick={this.copyToClipboard}
+            >Copy to Clipboard</Button>
+            {/* <Cascader
                 items={this.cascades}
                 currentItem={selectedItem}
                 itemClickAction={(item: itemType) => {
@@ -227,20 +246,20 @@ class App extends React.Component<{}, AppState> {
             <div className="featureselector">
               <Breadcrumb>
                 <Breadcrumb.Item>
-                  <a onClick={() => {this.setState({selectedItem: 'style'});}}>Style</a>
+                  <a onClick={() => { this.setState({ selectedItem: 'style' }); }}>Style</a>
                 </Breadcrumb.Item>
                 {
                   selectedItem !== 'style' &&
-                    <Breadcrumb.Item>
-                      <a onClick={() => {this.setState({selectedItem: 'rule'});}}>Rule</a>
-                    </Breadcrumb.Item>
+                  <Breadcrumb.Item>
+                    <a onClick={() => { this.setState({ selectedItem: 'rule' }); }}>Rule</a>
+                  </Breadcrumb.Item>
 
                 }
                 {
                   selectedItem === 'symbolizer' &&
-                    <Breadcrumb.Item>
-                      <a onClick={() => {this.setState({selectedItem: 'symbolizer'});}}>Symbolizer</a>
-                    </Breadcrumb.Item>
+                  <Breadcrumb.Item>
+                    <a onClick={() => { this.setState({ selectedItem: 'symbolizer' }); }}>Symbolizer</a>
+                  </Breadcrumb.Item>
                 }
               </Breadcrumb>
               <FeatureSelector
@@ -260,11 +279,11 @@ class App extends React.Component<{}, AppState> {
             </div>
             {
               copy &&
-                <textarea
-                  id="copy-style"
-                  value={sld}
-                  readOnly
-                />
+              <textarea
+                id="copy-style"
+                value={sld}
+                readOnly
+              />
             }
           </Row>
         </div>
